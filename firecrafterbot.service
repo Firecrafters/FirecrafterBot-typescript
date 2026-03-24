@@ -1,0 +1,13 @@
+[Unit]
+Description=Firecrafter's Discord Bot
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/firecrafter/WebstormProjects/FirecrafterBot
+ExecStart=/usr/bin/fish /home/firecrafter/WebstormProjects/FirecrafterBot/start.fish
+Restart=on-failure
+RestartSec=3s
+
+[Install]
+WantedBy=multi-user.target
