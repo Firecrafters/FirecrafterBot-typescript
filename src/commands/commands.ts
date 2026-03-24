@@ -1,4 +1,4 @@
-import { type CommandCallArgs, type CommandHandler, CommandManager } from "../command_manager.js";
+import { type CommandCallArgs, type CommandHandler, CommandManager } from "../commandManager.js";
 import * as config from "../config.js"
 import bwaa from "./bwaa.js";
 import * as fish from "./fish.js"

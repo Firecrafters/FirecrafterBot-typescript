@@ -18,7 +18,7 @@ class CommandManager {
     }
 
     get commands(): { [key: string]: CommandHandler } {
-        return this.commands;
+        return this._commands;
     }
 
     constructor() {

@@ -4,7 +4,7 @@ import * as config from "./config.js";
 import bwaa from "./commands/bwaa.js";
 import * as fish from "./commands/fish.js"
 import { buildLeaderboardEmbed } from "./commands/fish.js";
-import { type CommandCallArgs, type CommandHandler, CommandManager } from "./command_manager.js";
+import { type CommandCallArgs, type CommandHandler, CommandManager } from "./commandManager.js";
 import { registerAll } from "./commands/commands.js";
 
 dotenv.config({
