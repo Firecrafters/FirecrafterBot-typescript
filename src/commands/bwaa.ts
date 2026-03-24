@@ -14,14 +14,13 @@ export default async function bwaa(message: Message, args: string[]): Promise<vo
 
     if (args.length > 0 && typeof args[0] == "string")
     {
-        if (parseInt(args[0]) > 0 && (parseInt(args[0]) <= config.BWAA_LIMIT || message.author.id == config.OWNER)) {
+        const val = parseFloat(args[0]);
+        if (val > 0 && val <= config.BWAA_LIMIT || message.author.id == config.OWNER) {
             let bwaaString = "";
-            for (let i = 0; i < parseInt(args[0]); i++) {
-                bwaaString += (bwaa() + " ");
-            }
-
+            const roundedVal = utils.probabilisticRound(val)
+            for (let i = 0; i < roundedVal; i++) bwaaString += (bwaa() + " ");
             await message.reply(bwaaString);
-        } else if (parseInt(args[0]) > config.BWAA_LIMIT) {
+        } else if (val > config.BWAA_LIMIT) {
             await message.reply(`${config.emotes.NO} Too many ${bwaa()}s`)
         } else {
             await message.reply(bwaa());

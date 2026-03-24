@@ -20,4 +20,11 @@ function makeEmbed(options: EmbedOptions): EmbedBuilder {
     return embed;
 }
 
-export { getRandomItem, makeEmbed };
+function probabilisticRound(num: number): number {
+    const lower = Math.floor(num);
+    const fraction = num - lower;
+    if (fraction === 0) return lower;
+    return Math.random() < fraction ? lower + 1 : lower;
+}
+
+export { getRandomItem, makeEmbed, probabilisticRound };
