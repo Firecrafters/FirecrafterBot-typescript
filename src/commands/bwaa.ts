@@ -1,4 +1,4 @@
-import { type CommandCallArgs } from "../command_manager.js";
+import { type CommandCallArgs } from "../commandManager.js";
 import { Message } from "discord.js";
 import * as config from "../config.js";
 import * as utils from "../utils.js";

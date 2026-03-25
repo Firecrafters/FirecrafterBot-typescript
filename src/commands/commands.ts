@@ -22,11 +22,11 @@ function registerAll(commands: CommandManager) {
         console.log("Stop triggered by " + message.author.tag);
         process.exit(0);
     });
-    
+
     commands.registerCommand("bwaa", bwaa, "bwaa!");
-    commands.registerCommand("fish", async function ({ message }) { await message.reply({ embed: fish.fish(message) }); }, "this command is fishy");
-    commands.registerCommand("points", async function ({ message }) { await message.reply({ embed: fish.getPoints(message) }); }, "get your fishing points");
-    commands.registerCommand("leaderboard", async function ({ message }) { await message.reply({ embed: fish.getLeaderboardEmbed(config.LEADERBOARD_LENGTH_LIMIT) }); }, "get fishing leaderboard");
+    commands.registerCommand("fish", async function ({ message }) { await message.reply({ embeds: [fish.fish(message)]}) }, "this command is fishy");
+    commands.registerCommand("points", async function ({ message }) { await message.reply({ embeds: [fish.getPoints(message)] }); }, "get your fishing points");
+    commands.registerCommand("leaderboard", async function ({ message }) { await message.reply({ embeds: [fish.getLeaderboardEmbed(config.LEADERBOARD_LENGTH_LIMIT)] }); }, "get fishing leaderboard");
 
     commands.registerCommand("help", notImplemented, "helps you with commands"); // TODO: "help" command
 }

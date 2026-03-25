@@ -43,8 +43,8 @@ client.on("messageCreate", async (message: Message): Promise<void> => {
     const command = args.shift()?.toLowerCase();
 
     let embed: EmbedBuilder;
-    
-    if (!await commands.handle(command, { commandManager: commands, client, args, message, isOwner })) {
+
+    if (!await commands.handle(command || "", { commandManager: commands, client, args, message, isOwner })) {
         await message.reply(`Unknown command \`${config.PREFIX}${command}\``);
         console.log("An invalid command was sent: " + message.content);
     }
