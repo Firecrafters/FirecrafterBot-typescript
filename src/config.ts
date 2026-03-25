@@ -104,13 +104,16 @@ export async function loadAll() {
     const guilds = await fs.readdir("./storage/guilds");
     
     for (const userId of users) if (/^[0-9]+$/.test(userId)) try {
-        userConfigs[userId] = await Bun.file(`./storage/users/${userId}`).json();
+        userConfigs[userId] = _.merge({}, config.defaultUserConfig, await Bun.file(`./storage/users/${userId}`).json());
     } catch {
         await fs.rename(`./storage/users/${userId}`, `./storage/users/${userId}.bak`)
         console.log(`failed to load user data for ${userId}, file renamed to '${userId}.bak'`)
     }
     for (const guildId of guilds) if (/^[0-9]+$/.test(guildId)) try {
-        guildConfigs[guildId] = await Bun.file(`./storage/guilds/${guildId}`).json();
+        // update guild
+        guildConfigs[guildId] = _.merge({}, config.defaultGuildConfig, await Bun.file(`./storage/guilds/${guildId}`).json());
+        // update users
+        for (const user in guildConfigs[guildId]!.users) guildConfigs[guildId]!.users[user] = _.merge({}, guildConfigs[guildId]!.defaultUserConfig, guildConfigs[guildId]!.users[user]);
     } catch {
         await fs.rename(`./storage/guilds/${guildId}`, `./storage/guilds/${guildId}.bak`)
         console.log(`failed to load guild data for ${guildId}, file renamed to '${guildId}.bak'`)
