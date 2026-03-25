@@ -1,10 +1,7 @@
-import {Client, GatewayIntentBits, Message, type Channel, TextChannel, type EmbedBuilder} from "discord.js";
+import { Client, GatewayIntentBits, Message, type Channel, TextChannel } from "discord.js";
 import * as dotenv from "dotenv";
 import * as c from "./config.js";
-import bwaa from "./commands/bwaa.js";
-import * as fish from "./commands/fish.js"
-import { buildLeaderboardEmbed } from "./commands/fish.js";
-import { type CommandCallArgs, type CommandHandler, CommandManager } from "./commandManager.js";
+import { CommandManager } from "./commandManager.js";
 import { registerAll } from "./commands/commands.js";
 
 dotenv.config({
@@ -32,7 +29,7 @@ client.once("clientReady", async (): Promise<void> => {
 });
 
 client.on("messageCreate", async (message: Message): Promise<void> => {
-    // Ignore bots & and messages without prefix
+    // Ignore bots & and messages without a prefix
     if (message.author.bot || !message.content.startsWith(c.getGlobalGuildOverridableOption("prefix", message.guild))) return;
 
     const isOwner = c.config.globalOwners.includes(message.author.id);
@@ -40,15 +37,9 @@ client.on("messageCreate", async (message: Message): Promise<void> => {
     const args = message.content.slice(c.getGlobalGuildOverridableOption("prefix", message.guild).length).trim().split(/ +/);
     const command = args.shift();
 
-    let embed: EmbedBuilder;
-    
-    try {
-        if (!await commands.handle(command || "", { commandManager: commands, client, args, message, isOwner })) {
-            await message.reply(`Unknown command \`${c.getGlobalGuildOverridableOption("prefix", message.guild)}${command}\``);
-            console.log("An invalid command was sent: " + message.content);
-        }
-    } catch(err) {
-        console.log("An error was thrown in command handler!")
+    if (!await commands.handle(command || "", { commandManager: commands, client, args, message, isOwner })) {
+        await message.reply(`Unknown command \`${c.getGlobalGuildOverridableOption("prefix", message.guild)}${command}\``);
+        console.log("An invalid command was sent: " + message.content);
     }
 });
 

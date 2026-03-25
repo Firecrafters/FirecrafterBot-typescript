@@ -7,4 +7,3 @@ export enum Emote {
     evilBwaa = "evilBwaa",
 }
 export type Emotes = { [key in Emote]: string };
-export default Emote;

@@ -2,35 +2,35 @@ import { type GuildId, type UserId, type GuildResolvable, type UserResolvable, g
 import { Emote, type Emotes } from "./emote.js"
 import * as fs from "node:fs/promises";
 import type { Colors } from "./color.js";
-var _ = require("lodash"); // lodash doesnt seem to work with ESModule imports
+import _ from "lodash";
 
-// per-guild options that are user-overridable per-guild
+// Per-guild options that are user-overridable per-guild
 export type UserOverridableGuildOptions = {
     bwaaLimit: number;
 };
-// global options that are guild-overridable
+// Global options that are guild-overridable
 export type GuildOverridableGlobalOptions = {
     prefix: string;
 };
-// global options each user can override globally
+// Options each user can override globally
 export type UserOverridableGlobalOptions = {
 };
-// config for a user per-guild
+// Config for a user per-guild
 export type GuildUserConfig = {
     guildOverrides: Partial<UserOverridableGuildOptions>;
 };
-// config for a guild
+// Config for a guild
 export type GuildConfig = {
     defaultUserConfig: GuildUserConfig;
     globalOverrides: Partial<GuildOverridableGlobalOptions>;
     userOverridableOptions: UserOverridableGuildOptions;
     users: { [key: UserId]: GuildUserConfig };
 };
-// config for a user
+// Config for a user
 export type UserConfig = {
     globalOverrides: UserOverridableGlobalOptions;
 }
-// global configuration (config.json)
+// Global configuration (config.json)
 export type GlobalConfig = {
     globalOwners: UserId[];
     defaultGuildConfig: GuildConfig;
@@ -41,9 +41,9 @@ export type GlobalConfig = {
     userOverridableOptions: UserOverridableGlobalOptions;
     indentConfigs: number;
     autosaveSeconds: number;
-    leaderboardLengthLimit: number; 
+    leaderboardLengthLimit: number;
 };
-// add default values for ur new stuff to here
+// Add default values for your new stuff to here
 export const defaultConfig: GlobalConfig = {
     globalOwners: [],
     defaultGuildConfig: {
@@ -72,7 +72,7 @@ export const defaultConfig: GlobalConfig = {
 };
 
 export const configFile = Bun.file("./config.json");
-export var config: GlobalConfig = defaultConfig;
+export let config: GlobalConfig = defaultConfig;
 export default config;
 export const guildConfigs: { [key: GuildId]: GuildConfig } = {};
 export const userConfigs: { [key: UserId]: UserConfig } = {};
@@ -83,26 +83,25 @@ export async function saveConfig() {
     await configFile.write(_stringify(config));
 }
 export async function loadAll() {
-    var jsonConfig: unknown;
+    let jsonConfig: unknown;
     try {
         jsonConfig = await configFile.exists() ? await configFile.json() : undefined;
-        if (typeof jsonConfig !== "object" || !jsonConfig) throw "";
+        if (typeof jsonConfig !== "object" || !jsonConfig) throw "e";
     } catch { throw "Malformed config.json!"; }
     config = jsonConfig
-        ? _.merge({}, defaultConfig, jsonConfig) // combine the default and user provided config
-        : config; // use default config if user provided was not found
-    
-    
-    saveConfig(); // apply any config updates
-    
+        ? _.merge({}, defaultConfig, jsonConfig) // Combine the default config with the user-provided config
+        : config; // Use default config if user-provided was not found
+
+    await saveConfig(); // Apply any config updates
+
     if (!jsonConfig) throw "Default config placed at ./config.json, you may want to configure it, if you dont just run the app again!";
 
     await fs.mkdir("./storage/users", { recursive: true });
     await fs.mkdir("./storage/guilds", { recursive: true });
-    
+
     const users = await fs.readdir("./storage/users");
     const guilds = await fs.readdir("./storage/guilds");
-    
+
     for (const userId of users) if (/^[0-9]+$/.test(userId)) try {
         userConfigs[userId] = _.merge({}, config.defaultUserConfig, await Bun.file(`./storage/users/${userId}`).json());
     } catch {
@@ -120,7 +119,7 @@ export async function loadAll() {
     }
 }
 
-loadAll();
+await loadAll();
 
 export async function saveUser(user: UserResolvable) {
     const id = userIdHelper(user);

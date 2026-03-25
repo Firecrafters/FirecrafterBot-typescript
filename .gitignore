@@ -9,3 +9,8 @@ dist/
 config.json
 storage/
 db.sqlite
+
+# Ignore inferior package manager lockfiles
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

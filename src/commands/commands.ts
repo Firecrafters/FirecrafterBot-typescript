@@ -1,50 +1,50 @@
-import { type CommandCallArgs, type CommandHandler, CommandManager } from "../commandManager.js";
+import { type CommandCallArgs, CommandManager } from "../commandManager.js";
 import config, { loadAll, pauseAutosaves, saveAll, setAutosavesPaused } from "../config.js"
 import { saveExit } from "../utils.js";
 import bwaa from "./bwaa.js";
 import * as fish from "./fish.js"
 
 async function notImplemented({ message }: CommandCallArgs) {
-    message.reply(`Not implemented ${config.emotes.no}`);
+    await message.reply(`Not implemented ${config.emotes.no}`);
 }
 
 function registerAll(commands: CommandManager) {
     commands.registerCommand("save", async function ({ message, isOwner }) {
         if (!isOwner) return;
-        
+
         await message.reply(`Saving data ${config.emotes.cerberLoading}`);
         console.log("Manual save triggered by " + message.author.tag);
-        saveAll();
+        await saveAll();
     });
     commands.registerCommand("reload", async function ({ message, isOwner }) {
         if (!isOwner) return;
-        
+
         await message.reply(`Reloading data ${config.emotes.cerberLoading}`);
         console.log("Manual data reload triggered by " + message.author.tag);
-        loadAll();
+        await loadAll();
     });
     commands.registerCommand("toggleAutosave", async function ({ message, isOwner }) {
         if (!isOwner) return;
-        
+
         setAutosavesPaused(!pauseAutosaves);
         await message.reply(`Autosaving is now ${pauseAutosaves ? "**off** (for this session!)" : "**on**"}`);
         console.log(`Autosaving ${pauseAutosaves ? "disabled (for this session)" : "enabled"} by ` + message.author.tag);
-        loadAll();
+        await loadAll();
     });
-    
+
     commands.registerCommand("restart", async function({ message, isOwner }) {
         if (!isOwner) return;
 
         await message.reply(`Restarting ${config.emotes.cerberLoading}`);
         console.log("Restart triggered by " + message.author.tag);
-        saveExit(1);
+        await saveExit(1);
     });
     commands.registerCommand("stop", async function({ message, isOwner }) {
         if (!isOwner) return;
 
         await message.reply(`Stopping ${config.emotes.cerberLoading}`);
         console.log("Stop triggered by " + message.author.tag);
-        saveExit(0);
+        await saveExit(0);
     });
 
     commands.registerCommand("bwaa", bwaa, "bwaa!");

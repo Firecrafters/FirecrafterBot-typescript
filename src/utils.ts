@@ -28,8 +28,8 @@ export function probabilisticRound(num: number): number {
     return Math.random() < fraction ? lower + 1 : lower;
 }
 
-export function saveExit(code: number) {
-    saveAll();
+export async function saveExit(code: number) {
+    await saveAll();
     process.exit(code);
 }
 
