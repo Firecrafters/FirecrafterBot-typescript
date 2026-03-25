@@ -1,4 +1,4 @@
-import { Client, Message } from "discord.js";
+import { Client, Message, PermissionsBitField } from "discord.js";
 
 type CommandCallArgs = {
     commandManager: CommandManager;
@@ -6,6 +6,8 @@ type CommandCallArgs = {
     args: string[];
     isOwner: boolean;
     message: Message;
+    permissions: PermissionsBitField;
+    hasManageServer: boolean;
 };
 type CommandHandler = (args: CommandCallArgs) => Promise<void>;
 

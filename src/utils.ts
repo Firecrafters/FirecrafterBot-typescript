@@ -39,3 +39,7 @@ export type UserResolvable = User | UserId;
 export type GuildResolvable = Guild | GuildId;
 export function userIdHelper(user: UserResolvable): UserId { return (typeof user == "string") ? user : user.id }
 export function guildIdHelper(guild: GuildResolvable): GuildId { return (typeof guild == "string") ? guild : guild.id }
+
+export function isNumericalString(str: string): boolean {
+    return /^[0-9]+$/.test(str);
+}

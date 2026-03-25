@@ -3,6 +3,7 @@ import config, { loadAll, pauseAutosaves, saveAll, setAutosavesPaused } from "..
 import { saveExit } from "../utils.js";
 import bwaa from "./bwaa.js";
 import * as fish from "./fish.js"
+import override from "./override.js";
 
 async function notImplemented({ message }: CommandCallArgs) {
     await message.reply(`Not implemented ${config.emotes.no}`);
@@ -46,6 +47,9 @@ function registerAll(commands: CommandManager) {
         console.log("Stop triggered by " + message.author.tag);
         await saveExit(0);
     });
+    
+    commands.registerCommand("override", async function (a) { await override(a, false); }, "set various overrides")
+    commands.registerCommand("override!", async function (a) { await override(a, true); })
 
     commands.registerCommand("bwaa", bwaa, "bwaa!");
     commands.registerCommand("fish", async function ({ message }) { await message.reply({ embeds: [fish.fish(message)] }); }, "this command is fishy");
