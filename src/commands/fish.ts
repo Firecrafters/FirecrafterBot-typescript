@@ -3,6 +3,16 @@ import config from "../config.js";
 import { Database } from "bun:sqlite";
 import { EmbedBuilder, Message } from "discord.js";
 
+export const db = new Database("db.sqlite");
+
+db.run(`
+    CREATE TABLE IF NOT EXISTS fishing_data (
+        userID TEXT PRIMARY KEY,
+        username TEXT,
+        points REAL DEFAULT 0
+    )
+`);
+
 interface Rarity {
     name: string,
     multiplier: number,
@@ -57,20 +67,6 @@ function getRandomRarity(): Rarity {
     return RARITIES[0] as Rarity;
 }
 
-function getDb(): Database {
-    const db = new Database("db.sqlite");
-
-    db.run(`
-        CREATE TABLE IF NOT EXISTS fishing_data (
-            userID TEXT PRIMARY KEY,
-            username TEXT,
-            points REAL DEFAULT 0
-        )
-    `);
-
-    return db;
-}
-
 export function fish(message: Message): EmbedBuilder {
     const rarity: Rarity = getRandomRarity();
     const item: Catch = utils.getRandomItem(CATCHES);
@@ -79,7 +75,6 @@ export function fish(message: Message): EmbedBuilder {
     const id = message.author.id;
     const username = message.author.tag;
 
-    const db: Database = getDb();
     try {
         db.prepare(`
             INSERT INTO fishing_data (userID, username, points)
@@ -89,8 +84,6 @@ export function fish(message: Message): EmbedBuilder {
         `).run(id, username, worth);
     } catch (e) {
         console.error(`Error: ${e}`);
-    } finally {
-        db.close();
     }
 
     const suffix = rarity.name === "uncommon" ? "n" : "";
@@ -113,7 +106,6 @@ export function fish(message: Message): EmbedBuilder {
 export function getPoints(message: Message): EmbedBuilder {
     const id = message.author.id;
 
-    const db: Database = getDb();
     let points = 0;
 
     try {
@@ -125,8 +117,6 @@ export function getPoints(message: Message): EmbedBuilder {
             points = row.points;
     } catch (e) {
         console.error(`Error: ${e}`);
-    } finally {
-        db.close();
     }
 
     return utils.makeEmbed({
@@ -137,13 +127,9 @@ export function getPoints(message: Message): EmbedBuilder {
 }
 
 export function getLeaderboard(limit: number): UserPoints[] {
-    const db: Database = getDb();
-
     const rows = db.prepare(
         "SELECT userID, points FROM fishing_data ORDER BY points DESC LIMIT ?"
     ).all(limit) as UserPoints[];
-
-    db.close();
     return rows;
 }
 

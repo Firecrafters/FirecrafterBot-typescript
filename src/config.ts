@@ -1,9 +1,10 @@
-import { type GuildId, type UserId, type GuildResolvable, type UserResolvable, guildIdHelper, userIdHelper } from "./utils.js"
+import { type GuildId, type UserId, type GuildResolvable, type UserResolvable, guildIdHelper, userIdHelper, isNumericalString } from "./utils.js"
 import { Emote, type Emotes } from "./emote.js"
 import * as fs from "node:fs/promises";
 import type { Colors } from "./color.js";
 import _ from "lodash";
 
+// for overridable options make sure to put them in ./commands/override.ts if needed to allow for setting and getting them!
 // Per-guild options that are user-overridable per-guild
 export type UserOverridableGuildOptions = {
     bwaaLimit: number;
@@ -82,45 +83,6 @@ function _stringify(data: any) {
 export async function saveConfig() {
     await configFile.write(_stringify(config));
 }
-export async function loadAll() {
-    let jsonConfig: unknown;
-    try {
-        jsonConfig = await configFile.exists() ? await configFile.json() : undefined;
-        if (typeof jsonConfig !== "object" || !jsonConfig) throw "e";
-    } catch { throw "Malformed config.json!"; }
-    config = jsonConfig
-        ? _.merge({}, defaultConfig, jsonConfig) // Combine the default config with the user-provided config
-        : config; // Use default config if user-provided was not found
-
-    await saveConfig(); // Apply any config updates
-
-    if (!jsonConfig) throw "Default config placed at ./config.json, you may want to configure it, if you dont just run the app again!";
-
-    await fs.mkdir("./storage/users", { recursive: true });
-    await fs.mkdir("./storage/guilds", { recursive: true });
-
-    const users = await fs.readdir("./storage/users");
-    const guilds = await fs.readdir("./storage/guilds");
-
-    for (const userId of users) if (/^[0-9]+$/.test(userId)) try {
-        userConfigs[userId] = _.merge({}, config.defaultUserConfig, await Bun.file(`./storage/users/${userId}`).json());
-    } catch {
-        await fs.rename(`./storage/users/${userId}`, `./storage/users/${userId}.bak`)
-        console.log(`failed to load user data for ${userId}, file renamed to '${userId}.bak'`)
-    }
-    for (const guildId of guilds) if (/^[0-9]+$/.test(guildId)) try {
-        // update guild
-        guildConfigs[guildId] = _.merge({}, config.defaultGuildConfig, await Bun.file(`./storage/guilds/${guildId}`).json());
-        // update users
-        for (const user in guildConfigs[guildId]!.users) guildConfigs[guildId]!.users[user] = _.merge({}, guildConfigs[guildId]!.defaultUserConfig, guildConfigs[guildId]!.users[user]);
-    } catch {
-        await fs.rename(`./storage/guilds/${guildId}`, `./storage/guilds/${guildId}.bak`)
-        console.log(`failed to load guild data for ${guildId}, file renamed to '${guildId}.bak'`)
-    }
-}
-
-await loadAll();
-
 export async function saveUser(user: UserResolvable) {
     const id = userIdHelper(user);
     await Bun.file("./storage/users/"+id).write(_stringify(userConfigs[id]));
@@ -136,6 +98,46 @@ export async function saveAll() {
     await saveUsers();
     await saveGuilds();
 }
+export async function loadAll() {
+    let jsonConfig: unknown;
+    try {
+        jsonConfig = await configFile.exists() ? await configFile.json() : undefined;
+        if (typeof jsonConfig !== "object" || !jsonConfig) throw "e";
+    } catch { throw "Malformed config.json!"; }
+    config = jsonConfig
+        ? _.merge({}, defaultConfig, jsonConfig) // Combine the default config with the user-provided config
+        : config; // Use default config if user-provided was not found
+
+    if (!jsonConfig) throw "Default config placed at ./config.json, you may want to configure it, if you dont just run the app again!";
+
+    await fs.mkdir("./storage/users", { recursive: true });
+    await fs.mkdir("./storage/guilds", { recursive: true });
+
+    const users = await fs.readdir("./storage/users");
+    const guilds = await fs.readdir("./storage/guilds");
+
+    for (const userId of users) if (isNumericalString(userId)) try {
+        // update user
+        userConfigs[userId] = _.merge({}, config.defaultUserConfig, await Bun.file(`./storage/users/${userId}`).json());
+    } catch {
+        await fs.rename(`./storage/users/${userId}`, `./storage/users/${userId}.bak`)
+        console.log(`failed to load user data for ${userId}, file renamed to '${userId}.bak'`)
+    }
+    for (const guildId of guilds) if (isNumericalString(guildId)) try {
+        // update guild
+        guildConfigs[guildId] = _.merge({}, config.defaultGuildConfig, await Bun.file(`./storage/guilds/${guildId}`).json());
+        // update users
+        for (const user in guildConfigs[guildId]!.users) guildConfigs[guildId]!.users[user] = _.merge({}, guildConfigs[guildId]!.defaultUserConfig, guildConfigs[guildId]!.users[user]);
+    } catch {
+        await fs.rename(`./storage/guilds/${guildId}`, `./storage/guilds/${guildId}.bak`)
+        console.log(`failed to load guild data for ${guildId}, file renamed to '${guildId}.bak'`)
+    }
+    
+    await saveAll(); // save any merged changes
+}
+
+await loadAll();
+
 export let pauseAutosaves = false;
 export function setAutosavesPaused(to: boolean) { pauseAutosaves = to; }
 let saving = false;

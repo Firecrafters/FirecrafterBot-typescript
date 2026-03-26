@@ -28,8 +28,12 @@ Reloads the bot data.\
 
 **\_toggleAutosave**\
 Disables/enables autosaving of the bot data.\
-(Only the owner of the bot can use this command)
+(Only the owner of the bot can use this command)\
 (Does not persist through restarts)
+
+**\_override**\
+Allows for setting a variety of overrides for values!\
+for a guide just run the command!
 
 **\_fish**\
 Makes the bot fish.
